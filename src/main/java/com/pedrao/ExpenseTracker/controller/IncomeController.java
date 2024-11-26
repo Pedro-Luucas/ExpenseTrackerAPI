@@ -1,5 +1,6 @@
 package com.pedrao.ExpenseTracker.controller;
 
+import com.pedrao.ExpenseTracker.dto.NewIncomeRequest;
 import com.pedrao.ExpenseTracker.model.Income;
 import com.pedrao.ExpenseTracker.service.IncomeService;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,8 @@ public class IncomeController {
 
     // Criar um novo Income
     @PostMapping
-    public Income createIncome(@RequestBody Income income, @RequestParam String username) {
-        return incomeService.createIncome(income, username);
+    public Income createIncome(@RequestBody NewIncomeRequest income) {
+        return incomeService.createIncome(income);
     }
 
     // Deletar um Income pelo ID
@@ -41,20 +42,20 @@ public class IncomeController {
 
     // Editar o nome de um Income
     @PutMapping("/{id}/edit-name")
-    public Income editIncomeName(@PathVariable Long id, @RequestParam String newName, @RequestParam String username) {
-        return incomeService.editIncomeName(id, newName, username);
+    public Income editIncomeName(@PathVariable Long id, @RequestParam String newName) {
+        return incomeService.editIncomeName(id, newName);
     }
 
     // Editar a descrição de um Income
     @PutMapping("/{id}/edit-description")
-    public Income editIncomeDescription(@PathVariable Long id, @RequestParam String newDescription, @RequestParam String username) {
-        return incomeService.editIncomeDescription(id, newDescription, username);
+    public Income editIncomeDescription(@PathVariable Long id, @RequestParam String newDescription) {
+        return incomeService.editIncomeDescription(id, newDescription);
     }
 
     // Editar o valor de um Income
     @PutMapping("/{id}/edit-amount")
-    public Income editIncomeAmount(@PathVariable Long id, @RequestParam double newAmount, @RequestParam String username) {
-        return incomeService.editIncomeAmount(id, newAmount, username);
+    public Income editIncomeAmount(@PathVariable Long id, @RequestParam double newAmount) {
+        return incomeService.editIncomeAmount(id, newAmount);
     }
 }
 

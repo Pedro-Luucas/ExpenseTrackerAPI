@@ -1,11 +1,13 @@
 package com.pedrao.ExpenseTracker.service;
 
+import com.pedrao.ExpenseTracker.dto.NewIncomeRequest;
 import com.pedrao.ExpenseTracker.model.AppUser;
 import com.pedrao.ExpenseTracker.model.Income;
 import com.pedrao.ExpenseTracker.repository.AuthRepository;
 import com.pedrao.ExpenseTracker.repository.IncomeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -34,9 +36,21 @@ public class IncomeService {
     }
 
     // Criar um novo Income
-    public Income createIncome(Income income, String username) {
-        AppUser user = authRepository.findByUsername(username)
+    public Income createIncome(NewIncomeRequest incomeRequest) {
+        AppUser user = authRepository.findByUsername(appUserService.getName())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+
+        appUserService.addBalance((float) incomeRequest.getAmount());
+
+        Income income = new Income();
+        income.setAmount(incomeRequest.getAmount());
+        income.setName(incomeRequest.getName());
+        income.setSource(incomeRequest.getSource());
+        income.setDescription(incomeRequest.getDescription());
+
+        LocalDateTime time = LocalDateTime.now();
+        income.setDate(time);
+
         income.setUser(user);
         return incomeRepository.save(income);
     }
@@ -48,7 +62,7 @@ public class IncomeService {
     }
 
     // Editar o nome de um income
-    public Income editIncomeName(Long id, String name, String username) {
+    public Income editIncomeName(Long id, String name) {
         Income income = incomeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("income não encontrado!"));
 
@@ -59,7 +73,7 @@ public class IncomeService {
     }
 
     // Editar Descricao de um income
-    public Income editIncomeDescription(Long id, String description, String username) {
+    public Income editIncomeDescription(Long id, String description) {
         Income income = incomeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("income não encontrado!"));
 
@@ -70,18 +84,18 @@ public class IncomeService {
     }
 
     // Editar valor de um income
-    public Income editIncomeAmount(Long id, double amount, String username) {
+    public Income editIncomeAmount(Long id, double amount) {
         Income income = incomeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("income não encontrado!"));
 
         // Subtrai o valor antigo desse Income do balance do AppUser
-        appUserService.subtractBalance(username, (float) income.getAmount());
+        appUserService.subtractBalance((float) income.getAmount());
 
         // Atualiza o valor do Income
         income.setAmount(amount);
 
         // Adiciona o novo valor do Income no balance do AppUser
-        appUserService.addBalance(username, (float) income.getAmount());
+        appUserService.addBalance((float) income.getAmount());
 
         return incomeRepository.save(income); // Salva as alterações
     }

@@ -14,7 +14,8 @@ public class AppUserService {
     }
 
     // Adicionar ao balance do usuário
-    public AppUser addBalance(String username, float amount) {
+    public AppUser addBalance(float amount) {
+        String username = getName();
         AppUser user = authRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
@@ -23,7 +24,8 @@ public class AppUserService {
     }
 
     // Subtrair do balance do usuário
-    public AppUser subtractBalance(String username, float amount) {
+    public AppUser subtractBalance(float amount) {
+        String username = getName();
         AppUser user = authRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
@@ -32,7 +34,8 @@ public class AppUserService {
     }
 
     // Obter o balance atual do usuário
-    public Float getBalance(String username) {
+    public Float getBalance() {
+        String username = getName();
         AppUser user = authRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
@@ -42,6 +45,10 @@ public class AppUserService {
     // Verificar se o usuário está autenticado
     public boolean isAuthenticated() {
         return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+    }
+
+    public String getName() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
 

@@ -13,14 +13,9 @@ public class AppUserController {
     }
 
     // Obter o balance atual do usuário
-    @GetMapping("/{username}/balance")
-    public Float getBalance(@PathVariable String username) {
-        return appUserService.getBalance(username);
+    @GetMapping("/balance")
+    public Float getBalance() {
+        return appUserService.getBalance();
     }
 
-    // Verificar se o usuário está autenticado
-    @GetMapping("/is-auth")
-    public boolean isAuth() {
-        return appUserService.isAuthenticated();
-    }
 }

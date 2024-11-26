@@ -1,11 +1,13 @@
 package com.pedrao.ExpenseTracker.service;
 
+import com.pedrao.ExpenseTracker.dto.NewExpenseRequest;
 import com.pedrao.ExpenseTracker.model.AppUser;
 import com.pedrao.ExpenseTracker.model.Expense;
 import com.pedrao.ExpenseTracker.repository.AuthRepository;
 import com.pedrao.ExpenseTracker.repository.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,8 +23,8 @@ public class ExpenseService {
     }
 
     // Buscar todas as expenses de um usuário
-    public List<Expense> findAllExpenses(String username) {
-        AppUser user = authRepository.findByUsername(username)
+    public List<Expense> findAllExpenses() {
+        AppUser user = authRepository.findByUsername(appUserService.getName())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
         return expenseRepository.findByUser(user);
     }
@@ -34,9 +36,20 @@ public class ExpenseService {
     }
 
     // Criar uma nova expense
-    public Expense createExpense(Expense expense, String username) {
-        AppUser user = authRepository.findByUsername(username)
+    public Expense createExpense(NewExpenseRequest expenseRequest) {
+        AppUser user = authRepository.findByUsername(appUserService.getName())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+
+        Expense expense = new Expense();
+
+        appUserService.subtractBalance((float) expenseRequest.getAmount());
+
+        expense.setName(expenseRequest.getName());
+        expense.setDescription(expenseRequest.getDescription());
+        expense.setAmount(expenseRequest.getAmount());
+        LocalDateTime time = LocalDateTime.now();
+        expense.setDate(time);
+
         expense.setUser(user);
         return expenseRepository.save(expense);
     }
@@ -44,22 +57,23 @@ public class ExpenseService {
     // Deletar uma expense pelo ID
     public void deleteExpense(Long id) {
         Expense expense = findExpenseById(id);
+        appUserService.addBalance((float) expense.getAmount());
         expenseRepository.delete(expense);
     }
 
     // Editar o nome de uma expense
-    public Expense editExpenseName(Long id, String name, String username) {
+    public Expense editExpenseName(Long id, String name) {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("expense não encontrada!"));
 
-        // Atualiza o nome da despesa
+        // Atualiza o nome da expense
         expense.setName(name);
 
         return expenseRepository.save(expense); // Salva as alterações
     }
 
     // Editar Descricao de uma expense
-    public Expense editExpenseDescription(Long id, String description, String username) {
+    public Expense editExpenseDescription(Long id, String description) {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("expense não encontrada!"));
 
@@ -69,18 +83,18 @@ public class ExpenseService {
         return expenseRepository.save(expense); // Salva as alterações
     }
 
-    public Expense editExpenseAmount(Long id, double amount, String username) {
+    public Expense editExpenseAmount(Long id, double amount) {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("expense não encontrada!"));
 
         // Subtrai o valor antigo dessa Expense do balance do AppUser
-        appUserService.subtractBalance(username, (float) expense.getAmount());
+        appUserService.subtractBalance((float) expense.getAmount());
 
         // Atualiza o valor da Expense
         expense.setAmount(amount);
 
         // Adiciona o novo valor da Expense no balance do AppUser
-        appUserService.addBalance(username, (float) expense.getAmount());
+        appUserService.addBalance((float) expense.getAmount());
 
         return expenseRepository.save(expense); // Salva as alterações
     }
