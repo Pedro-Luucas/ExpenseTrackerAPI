@@ -29,14 +29,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf().disable()
-                .formLogin(httpForm -> httpForm
-                        .loginPage("/expense_tracker/login").permitAll()
-                )
+                .csrf().disable() // CSRF desabilitado para APIs REST
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
+                .httpBasic()
+                .and()
                 .build();
     }
 

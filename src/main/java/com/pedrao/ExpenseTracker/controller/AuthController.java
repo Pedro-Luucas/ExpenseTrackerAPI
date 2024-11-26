@@ -1,6 +1,7 @@
 package com.pedrao.ExpenseTracker.controller;
 
-import com.pedrao.ExpenseTracker.dto.AuthRequest;
+import com.pedrao.ExpenseTracker.dto.LoginRequest;
+import com.pedrao.ExpenseTracker.dto.RegisterRequest;
 import com.pedrao.ExpenseTracker.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +24,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AuthRequest authDTO) {
-        authService.registerUser(authDTO.getUsername(), authDTO.getPassword());
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        authService.registerUser(request.getUsername(), request.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado com sucesso!");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));

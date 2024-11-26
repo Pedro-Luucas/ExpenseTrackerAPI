@@ -1,6 +1,6 @@
 package com.pedrao.ExpenseTracker.service;
 
-import com.pedrao.ExpenseTracker.dto.AuthRequest;
+import com.pedrao.ExpenseTracker.dto.RegisterRequest;
 import com.pedrao.ExpenseTracker.model.AppUser;
 import com.pedrao.ExpenseTracker.repository.AuthRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +17,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public AuthRequest registerUser(String username, String password) {
+    public RegisterRequest registerUser(String username, String password) {
         if (authRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Usuario já existe!");
         }
@@ -25,9 +25,10 @@ public class AuthService {
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
+        user.setBalance((float) 0);
         authRepository.save(user);
 
-        return new AuthRequest(username, passwordEncoder.encode(password));
+        return new RegisterRequest(username, passwordEncoder.encode(password), 0f);
     }
 
     public AppUser findByUsername(String username) {
