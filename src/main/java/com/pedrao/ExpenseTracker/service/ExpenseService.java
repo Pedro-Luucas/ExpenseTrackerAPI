@@ -25,7 +25,7 @@ public class ExpenseService {
     // Buscar todas as expenses de um usuário
     public List<Expense> findAllExpenses() {
         AppUser user = authRepository.findByUsername(appUserService.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                .orElseThrow(() -> new RuntimeException("usuário não encontrado!"));
         return expenseRepository.findByUser(user);
     }
 
