@@ -1,14 +1,8 @@
 package com.pedrao.ExpenseTracker.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@Data
 public class LoginRequest {
 
     private final String username;
