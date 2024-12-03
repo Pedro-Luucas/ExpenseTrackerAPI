@@ -1,5 +1,6 @@
 package com.pedrao.ExpenseTracker.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,7 +27,11 @@ public class Income {
     @Column(nullable = false)
     private LocalDateTime date;
 
+    @Column(nullable = false)
+    private LocalDateTime lastEdited;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private AppUser user;
 }

@@ -42,10 +42,6 @@ public class AppUserService {
         return user.getBalance(); // Retorna o balance do usuário
     }
 
-    // Verificar se o usuário está autenticado
-    public boolean isAuthenticated() {
-        return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
-    }
 
     public String getName() {
         return SecurityContextHolder.getContext().getAuthentication().getName();

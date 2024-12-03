@@ -1,14 +1,20 @@
 package com.pedrao.ExpenseTracker.service;
 
 import com.pedrao.ExpenseTracker.dto.NewIncomeRequest;
+import com.pedrao.ExpenseTracker.exception.ResourceNotFoundException;
 import com.pedrao.ExpenseTracker.model.AppUser;
 import com.pedrao.ExpenseTracker.model.Income;
 import com.pedrao.ExpenseTracker.repository.AuthRepository;
 import com.pedrao.ExpenseTracker.repository.IncomeRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class IncomeService {
@@ -22,23 +28,33 @@ public class IncomeService {
         this.appUserService = appUserService;
     }
 
-    // Buscar todos os Incomes de um usuário
-    public List<Income> findAllIncomes(String username) {
+    // Buscar todos os incomes do usuário autenticado
+    public List<Income> findAllIncomes() {
+        String username = appUserService.getName(); // Nome do usuário autenticado
         AppUser user = authRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado!"));
         return incomeRepository.findByUser(user);
     }
 
-    // Buscar um Income pelo ID
+    // Buscar um income pelo ID
     public Income findIncomeById(Long id) {
-        return incomeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Income não encontrado!"));
+        Income income = incomeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Income não encontrado!"));
+
+        // Verifica se o usuário autenticado é o dono do income
+        String username = appUserService.getName();
+        if (!income.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("Você não tem permissão para acessar este recurso.");
+        }
+
+        return income;
     }
 
     // Criar um novo Income
     public Income createIncome(NewIncomeRequest incomeRequest) {
-        AppUser user = authRepository.findByUsername(appUserService.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+        String username = appUserService.getName();
+        AppUser user = authRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado!"));
 
         appUserService.addBalance((float) incomeRequest.getAmount());
 
@@ -50,6 +66,7 @@ public class IncomeService {
 
         LocalDateTime time = LocalDateTime.now();
         income.setDate(time);
+        income.setLastEdited(time);
 
         income.setUser(user);
         return incomeRepository.save(income);
@@ -57,6 +74,7 @@ public class IncomeService {
 
     // Deletar um Income pelo ID
     public void deleteIncome(Long id) {
+
         Income income = findIncomeById(id);
         incomeRepository.delete(income);
     }
@@ -69,6 +87,9 @@ public class IncomeService {
         // Atualiza o nome do income
         income.setName(name);
 
+        LocalDateTime time = LocalDateTime.now();
+        income.setLastEdited(time);
+
         return incomeRepository.save(income); // Salva as alterações
     }
 
@@ -79,6 +100,9 @@ public class IncomeService {
 
         // Atualiza a descrição do income
         income.setDescription(description);
+
+        LocalDateTime time = LocalDateTime.now();
+        income.setLastEdited(time);
 
         return incomeRepository.save(income); // Salva as alterações
     }
@@ -96,6 +120,9 @@ public class IncomeService {
 
         // Adiciona o novo valor do Income no balance do AppUser
         appUserService.addBalance((float) income.getAmount());
+
+        LocalDateTime time = LocalDateTime.now();
+        income.setLastEdited(time);
 
         return incomeRepository.save(income); // Salva as alterações
     }

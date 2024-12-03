@@ -5,6 +5,7 @@ import com.pedrao.ExpenseTracker.model.AppUser;
 import com.pedrao.ExpenseTracker.model.Expense;
 import com.pedrao.ExpenseTracker.repository.AuthRepository;
 import com.pedrao.ExpenseTracker.repository.ExpenseRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,18 +23,28 @@ public class ExpenseService {
         this.appUserService = appUserService;
     }
 
-    // Buscar todas as expenses de um usuário
+    // Buscar todas as expenses do usuário autenticado
     public List<Expense> findAllExpenses() {
-        AppUser user = authRepository.findByUsername(appUserService.getName())
-                .orElseThrow(() -> new RuntimeException("usuário não encontrado!"));
+        String username = appUserService.getName(); // Nome do usuário autenticado
+        AppUser user = authRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
         return expenseRepository.findByUser(user);
     }
 
-    // Buscar uma expense pelo ID
+    // Buscar uma expense pelo ID, garantindo que pertence ao usuário autenticado
     public Expense findExpenseById(Long id) {
-        return expenseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("expense não encontrada!"));
+        Expense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense não encontrada!"));
+
+        // Verifica se o usuário autenticado é o dono da expense
+        String username = appUserService.getName();
+        if (!expense.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("Você não tem permissão para acessar esta expense.");
+        }
+
+        return expense;
     }
+
 
     // Criar uma nova expense
     public Expense createExpense(NewExpenseRequest expenseRequest) {
@@ -47,7 +58,9 @@ public class ExpenseService {
         expense.setName(expenseRequest.getName());
         expense.setDescription(expenseRequest.getDescription());
         expense.setAmount(expenseRequest.getAmount());
+
         LocalDateTime time = LocalDateTime.now();
+        expense.setLastEdited(time);
         expense.setDate(time);
 
         expense.setUser(user);
@@ -69,6 +82,9 @@ public class ExpenseService {
         // Atualiza o nome da expense
         expense.setName(name);
 
+        LocalDateTime time = LocalDateTime.now();
+        expense.setLastEdited(time);
+
         return expenseRepository.save(expense); // Salva as alterações
     }
 
@@ -79,6 +95,9 @@ public class ExpenseService {
 
         // Atualiza a descrição da expense
         expense.setDescription(description);
+
+        LocalDateTime time = LocalDateTime.now();
+        expense.setLastEdited(time);
 
         return expenseRepository.save(expense); // Salva as alterações
     }
@@ -95,6 +114,9 @@ public class ExpenseService {
 
         // Adiciona o novo valor da Expense no balance do AppUser
         appUserService.addBalance((float) expense.getAmount());
+
+        LocalDateTime time = LocalDateTime.now();
+        expense.setLastEdited(time);
 
         return expenseRepository.save(expense); // Salva as alterações
     }
