@@ -33,7 +33,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
-    // -------------------------EXPENSES-------------------------
+    // ------------------------- EXPENSES -------------------------
     @Operation(summary = "Listar todas as expenses", description = "Obtém uma lista de todas as expenses registradas.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
@@ -58,7 +58,7 @@ public class AdminController {
         }
     }
 
-    // -------------------------INCOMES-------------------------
+    // ------------------------- INCOMES -------------------------
     @Operation(summary = "Listar todos os incomes", description = "Obtém uma lista de todos os incomes registrados.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
@@ -83,7 +83,7 @@ public class AdminController {
         }
     }
 
-    // -------------------------METODOS-ADMIN-------------------------
+    // ------------------------- METODOS-ADMIN -------------------------
     @Operation(summary = "Deletar um usuário por ID", description = "Remove um usuário pelo seu ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Usuário removido com sucesso"),
@@ -99,12 +99,13 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/users/{id}/balance")
+
     @Operation(summary = "Atualizar saldo de um usuário", description = "Atualiza o saldo de um usuário pelo seu ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Saldo atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
+    @PutMapping("/users/{id}/balance")
     public ResponseEntity<?> updateUserBalance(@PathVariable Long id, @RequestBody Float newBalance) {
         try {
             return ResponseEntity.ok(adminService.updateUserBalance(id, newBalance));

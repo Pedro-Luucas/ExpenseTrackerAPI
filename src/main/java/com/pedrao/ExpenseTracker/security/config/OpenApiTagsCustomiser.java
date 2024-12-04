@@ -12,25 +12,16 @@ public class OpenApiTagsCustomiser extends SpecFilter implements OpenApiCustomiz
         // remove the property reference controller
         openApi.getPaths().entrySet().removeIf(path -> path.getValue().readOperations().stream().anyMatch(
                 operation -> operation.getTags().stream().anyMatch(tag -> tag.endsWith("property-reference-controller"))));
-        // rename the operation tags
-        openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
-                .forEach(operation -> {
-                    String tagName = operation.getTags().get(0);
-                    // rename the entity-controller tags
-                    if (tagName.endsWith("entity-controller")) {
-                        String entityName = tagName.substring(0, tagName.length() - 18);
-                        String myTagValue = "my-entity-" + entityName;
-                        // Replace with the new tag value
-                        operation.getTags().set(0, myTagValue);
-                    }
-                    // rename the search-controller tags
-                    else if (tagName.endsWith("search-controller")) {
-                        String entityName = tagName.substring(0, tagName.length() - 18);
-                        String myTagValue = "my-search-" + entityName;
-                        // Replace with the new tag value
-                        operation.getTags().set(0, myTagValue);
-                    }
-                });
+
+        openApi.getPaths().entrySet().removeIf(path -> path.getValue().readOperations().stream().anyMatch(
+                operation -> operation.getTags().stream().anyMatch(tag -> tag.endsWith("search-controller"))));
+
+        openApi.getPaths().entrySet().removeIf(path -> path.getValue().readOperations().stream().anyMatch(
+                operation -> operation.getTags().stream().anyMatch(tag -> tag.endsWith("entity-controller"))));
+
+        openApi.getPaths().entrySet().removeIf(path -> path.getValue().readOperations().stream().anyMatch(
+                operation -> operation.getTags().stream().anyMatch(tag -> tag.endsWith("profile-controller"))));
+
         removeBrokenReferenceDefinitions(openApi);
     }
 }

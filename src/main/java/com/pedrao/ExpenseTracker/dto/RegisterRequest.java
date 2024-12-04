@@ -12,4 +12,5 @@ public class RegisterRequest {
     private final String password;
     private final Float balance;
     private final List<Role> roles;
+
 }
